@@ -1,6 +1,5 @@
 import streamlit as st
 import os
-import requests
 from google import genai
 
 # 1. Page Configuration & Setup
@@ -12,28 +11,24 @@ st.set_page_config(
 )
 
 # ==========================================
-# 🎨 PREMIUM UI CSS INJECTION (From Prototype)
+# 🎨 PREMIUM UI CSS INJECTION
 # ==========================================
 st.markdown("""
     <style>
-    /* Import Premium Typography Systems */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600&family=Playfair+Display:ital,wght=0,400;0,600;0,700;1,400;1,600&display=swap');
     
-    /* Hide Default Streamlit Overlays */
     #MainMenu {visibility: hidden;}
     header {visibility: hidden;}
     footer {visibility: hidden;}
     .stDeployButton {display:none;}
     [data-testid="stToolbar"] {display: none;}
     
-    /* Global Background & Base Font */
     html, body, [data-testid="stAppViewContainer"] {
         background-color: #05050A !important;
         color: #cbd5e1 !important;
         font-family: 'Inter', sans-serif !important;
     }
     
-    /* Ambient Top Glow Layer */
     [data-testid="stAppViewContainer"]::before {
         content: "";
         position: fixed;
@@ -44,7 +39,6 @@ st.markdown("""
         z-index: 0;
     }
     
-    /* Main Content Width Contributor */
     [data-testid="stBlockContainer"] {
         max-width: 680px !important;
         padding-top: 4rem !important;
@@ -53,7 +47,6 @@ st.markdown("""
         z-index: 10;
     }
 
-    /* Brand Header Elements */
     .brand-container {
         text-align: center;
         margin-bottom: 2.5rem;
@@ -110,7 +103,6 @@ st.markdown("""
         margin: 0 auto;
     }
 
-    /* Streamlit Text Input Formatting Override */
     .stTextArea > div > div > textarea {
         background: #0F101A !important;
         border: 1px solid #1A1B2E !important;
@@ -121,7 +113,6 @@ st.markdown("""
         line-height: 1.6 !important;
     }
     
-    /* Waitlist Input Box Styling */
     .stTextInput > div > div > input {
         background: #131A2A !important;
         border: 1px solid #1A1B2E !important;
@@ -130,7 +121,6 @@ st.markdown("""
         padding: 12px 16px !important;
     }
 
-    /* Premium Button Framework */
     div.stButton > button {
         background: linear-gradient(135deg, #FF9933, #c96a10) !important;
         color: white !important;
@@ -149,7 +139,6 @@ st.markdown("""
         color: white !important;
     }
 
-    /* Content Layout Components */
     .playbook-card {
         background-color: #0F101A;
         border: 1px solid #1A1B2E;
@@ -167,7 +156,6 @@ st.markdown("""
         background: linear-gradient(90deg, transparent, rgba(255,153,51,0.5), transparent);
     }
     
-    /* Playbook Typography Integration */
     .playbook-output h2 {
         font-family: 'Playfair Display', serif !important;
         color: #ffffff !important;
@@ -216,7 +204,6 @@ st.markdown("""
         margin-bottom: 1.5rem;
     }
 
-    /* Shimmer Effect Utilities */
     .skeleton-box {
         background: rgba(26, 27, 46, 0.5);
         border-radius: 0.5rem;
@@ -249,7 +236,7 @@ if not gemini_key:
 
 client = genai.Client(api_key=gemini_key)
 
-# App Navigation Memory States
+# Session state management initialization
 if "app_state" not in st.session_state:
     st.session_state.app_state = "idle"
 if "playbook_data" not in st.session_state:
@@ -257,7 +244,7 @@ if "playbook_data" not in st.session_state:
 if "waitlist_submitted" not in st.session_state:
     st.session_state.waitlist_submitted = False
 
-# --- BRANDING LAYER ---
+# --- BRANDING HEADER LAYER ---
 st.markdown("""
     <div class="brand-container">
         <img src="https://i.ibb.co/ymyzDNmj/IMG-20260301-153511-300.webp" class="brand-logo" alt="IdeaHive Logo">
@@ -317,12 +304,28 @@ if st.session_state.app_state == "generating":
         Provide a detailed, step-by-step landing page validation playbook blueprint specifically tailored for this startup idea: "{st.session_state.current_idea}".
         Use clean Markdown headers like '## Executive Summary' and '## First 30 Days: Action Plan'.
         List the exact low-friction landing page tools and audience-building software stacks required to run the test efficiently.
+        
+        Conclude your strategic playbook layout with this exact text message matching our brand container layout pattern:
+        "✨ Wishing you the absolute best of luck on your validation journey! Let's build something historic together.  
+        — Team IdeaHive 🐝"
         """
         
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt_payload
-        )
+        # Dual-Model Resiliency Pipeline Strategy
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt_payload
+            )
+        except Exception as flash_error:
+            # Catch transient load errors or 503 status code limits on Flash
+            if "503" in str(flash_error) or "UNAVAILABLE" in str(flash_error):
+                response = client.models.generate_content(
+                    model="gemini-2.5-pro",
+                    contents=prompt_payload
+                )
+            else:
+                raise flash_error
+
         st.session_state.playbook_data = response.text
         st.session_state.app_state = "results"
         st.rerun()
@@ -340,7 +343,6 @@ if st.session_state.app_state == "results":
             <div class="playbook-output">
     """, unsafe_allow_html=True)
     
-    # Render rich text outputs from session state safely
     st.markdown(st.session_state.playbook_data)
     
     st.markdown("""
@@ -356,7 +358,6 @@ if st.session_state.app_state == "results":
         </div>
     """, unsafe_allow_html=True)
     
-    # Use native elements within standard flow to avoid losing state on submit
     if not st.session_state.waitlist_submitted:
         with st.form("waitlist_form", clear_on_submit=True):
             email_input = st.text_input("Email Field", placeholder="Enter your email address", label_visibility="collapsed")
@@ -371,7 +372,6 @@ if st.session_state.app_state == "results":
     else:
         st.success("🎉 You're on the list! Welcome to Team IdeaHive. 🐝")
         
-    # Optional Reset Action Trigger
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("🔄 Test Another Idea"):
         st.session_state.app_state = "idle"
