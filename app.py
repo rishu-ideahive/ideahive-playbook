@@ -181,7 +181,6 @@ st.markdown("""
         font-size: 16px !important;
     }
 
-    /* Branded Embedded Capture Layout Container */
     .waitlist-container-card {
         background: rgba(15, 16, 26, 0.9);
         border: 1px solid rgba(255, 153, 51, 0.3);
@@ -310,17 +309,18 @@ if st.session_state.app_state == "generating":
         — Team IdeaHive 🐝"
         """
         
-        # Dual-Model Resiliency Pipeline Strategy
+        # Dual-Model Resiliency Pipeline Strategy (Flash-to-Flash alternative structure)
         try:
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
                 contents=prompt_payload
             )
         except Exception as flash_error:
-            # Catch transient load errors or 503 status code limits on Flash
-            if "503" in str(flash_error) or "UNAVAILABLE" in str(flash_error):
+            # Check for rate/overload signals and drop down to high-quota alternative 2.0 architecture safely
+            error_msg = str(flash_error)
+            if "503" in error_msg or "UNAVAILABLE" in error_msg or "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
                 response = client.models.generate_content(
-                    model="gemini-2.5-pro",
+                    model="gemini-2.0-flash",
                     contents=prompt_payload
                 )
             else:
@@ -350,7 +350,6 @@ if st.session_state.app_state == "results":
         </div>
     """, unsafe_allow_html=True)
     
-    # --- INTERACTIVE SLIDE WAITLIST CARD ---
     st.markdown("""
         <div class="waitlist-container-card">
             <div class="waitlist-title">Join the Elite Waitlist</div>
