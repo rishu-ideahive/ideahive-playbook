@@ -1,4 +1,4 @@
-import os
+nectionimport os
 import streamlit as st
 from dotenv import load_dotenv
 from google import genai
@@ -47,4 +47,4 @@ if st.button("Generate My Playbook"):
                 st.markdown("---")
                 
             except Exception as e:
-                st.error(f"❌ Core engine connection failed: {e}")
+                st.error(f"❌ Core engine con failed: {e}")
