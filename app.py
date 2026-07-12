@@ -301,10 +301,16 @@ def _is_retryable_gemini_error(error):
 
     if structured_values:
         for value in structured_values:
-            if isinstance(value, int) and not isinstance(value, bool) and value == 503:
+            if isinstance(value, int) and not isinstance(value, bool) and value in (503, 504):
                 return True
             normalized_value = str(value).strip().upper()
-            if normalized_value in {"503", "UNAVAILABLE", "SERVICE_UNAVAILABLE"}:
+            if normalized_value in {
+                "503",
+                "UNAVAILABLE",
+                "SERVICE_UNAVAILABLE",
+                "504",
+                "DEADLINE_EXCEEDED",
+            }:
                 return True
         return False
 
@@ -316,6 +322,9 @@ def _is_retryable_gemini_error(error):
         "model is experiencing high demand",
         "temporary unavailable",
         "unavailable",
+        "504",
+        "deadline exceeded",
+        "deadline_exceeded",
     )
     return any(marker in fallback_message for marker in temporary_markers)
 
