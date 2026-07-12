@@ -45,15 +45,18 @@ html, body, [data-testid="stAppViewContainer"] {
 
 [data-testid="stBlockContainer"] {
     max-width: 760px !important;
-    padding: 18px 24px 56px !important;
+    padding: 0 24px 32px !important;
+}
+[data-testid="stMainBlockContainer"], [data-testid="stMain"] .block-container {
+    padding-top: 0 !important;
 }
 
 .ih-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 0 -24px 42px;
-    padding: 12px 24px;
+    margin: 0 -24px 22px;
+    padding: 10px 24px;
     border-bottom: 1px solid var(--ih-border);
     background: rgba(7, 7, 15, 0.72);
     backdrop-filter: blur(14px);
@@ -79,7 +82,7 @@ html, body, [data-testid="stAppViewContainer"] {
     text-transform: uppercase;
 }
 
-.ih-hero { position: relative; text-align: center; margin: 0 auto 24px; }
+.ih-hero { position: relative; text-align: center; margin: 0 auto 20px; }
 .ih-badge {
     display: inline-flex;
     align-items: center;
@@ -123,11 +126,13 @@ div[data-testid="stTextArea"] [data-baseweb="textarea"] {
     border-radius: 14px !important;
     background: rgba(7, 7, 15, 0.92) !important;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025) !important;
+    outline: none !important;
     transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
+div[data-testid="stTextArea"] [data-baseweb="textarea"]:hover { border-color: rgba(162, 155, 254, 0.55) !important; }
 div[data-testid="stTextArea"] textarea {
-    min-height: 104px !important;
-    height: 104px !important;
+    min-height: 110px !important;
+    height: 110px !important;
     padding: 16px !important;
     border: 0 !important;
     background: rgba(7, 7, 15, 0.92) !important;
@@ -135,33 +140,39 @@ div[data-testid="stTextArea"] textarea {
     font-family: 'Inter', sans-serif !important;
     font-size: 15px !important;
     line-height: 1.55 !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 div[data-testid="stTextArea"] textarea::placeholder { color: #657088 !important; }
+div[data-testid="stTextArea"] textarea:focus, div[data-testid="stTextArea"] textarea:focus-visible { outline: none !important; box-shadow: none !important; }
 div[data-testid="stTextArea"] [data-baseweb="textarea"]:focus-within {
     border-color: var(--ih-cyan) !important;
     box-shadow: 0 0 0 3px rgba(0, 207, 232, 0.12), inset 0 1px 0 rgba(255,255,255,0.03) !important;
 }
 
-div.stButton { margin-top: 14px; }
+div.stButton { display: flex; justify-content: center; margin-top: 16px; }
 div.stButton > button {
     width: 100% !important;
-    min-height: 56px !important;
+    max-width: 520px !important;
+    min-height: 60px !important;
     padding: 0 24px !important;
     border: 0 !important;
-    border-radius: 50px !important;
-    background: linear-gradient(135deg, var(--ih-indigo), var(--ih-cyan), var(--ih-indigo)) !important;
-    background-size: 200% 200% !important;
+    border-radius: 18px !important;
+    background: linear-gradient(110deg, #5846d8 0%, var(--ih-indigo) 38%, #12bfdc 72%, var(--ih-cyan) 100%) !important;
+    background-size: 180% 180% !important;
+    background-position: 0% 50% !important;
     color: #fff !important;
     font-family: 'Inter', sans-serif !important;
-    font-size: 15px !important;
+    font-size: 18px !important;
     font-weight: 700 !important;
     letter-spacing: 0.01em !important;
-    box-shadow: 0 7px 26px rgba(108, 92, 231, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease !important;
+    box-shadow: 0 10px 26px rgba(0, 207, 232, 0.18), 0 7px 20px rgba(108, 92, 231, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.25s ease, background-position 0.35s ease !important;
 }
-div.stButton > button:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0, 207, 232, 0.28) !important; filter: brightness(1.06); }
+div.stButton > button:hover { transform: translateY(-2px); background-position: 100% 50% !important; box-shadow: 0 13px 32px rgba(0, 207, 232, 0.28), 0 8px 24px rgba(108, 92, 231, 0.34) !important; filter: brightness(1.05); }
 div.stButton > button:active { transform: scale(0.985); }
 div.stButton > button:focus-visible { outline: 3px solid rgba(0, 207, 232, 0.35) !important; outline-offset: 3px; }
+div.stButton > button:disabled { opacity: 0.52 !important; box-shadow: none !important; filter: saturate(0.65) !important; transform: none !important; }
 
 .ih-form-note { margin: 11px 0 0; color: var(--ih-muted); font-size: 12px; text-align: center; }
 
@@ -179,8 +190,13 @@ div.stButton > button:focus-visible { outline: 3px solid rgba(0, 207, 232, 0.35)
 .ih-loading-icon { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; margin-bottom: 11px; border: 1px solid rgba(0,207,232,0.3); border-radius: 14px; background: rgba(0,207,232,0.08); color: var(--ih-cyan); font-size: 19px; animation: ih-pulse 1.5s ease-in-out infinite; }
 .ih-loading h2 { margin: 0 0 5px; color: var(--ih-white); font-family: 'Syne', sans-serif; font-size: 19px; }
 .ih-loading p { margin: 0; color: var(--ih-muted); font-size: 13px; }
-.ih-loading-status { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; color: var(--ih-soft); font-size: 11px; font-weight: 600; }
-.ih-loading-status::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--ih-cyan); box-shadow: 0 0 8px var(--ih-cyan); }
+.ih-loading-steps { display: grid; gap: 8px; max-width: 330px; margin: 18px auto 0; text-align: left; }
+.ih-loading-step { display: flex; align-items: center; gap: 9px; color: #c7c4d7; font-size: 12px; animation: ih-step-in 0.45s ease both; }
+.ih-loading-step:nth-child(2) { animation-delay: 0.1s; }
+.ih-loading-step:nth-child(3) { animation-delay: 0.2s; }
+.ih-loading-step:nth-child(4) { animation-delay: 0.3s; }
+.ih-loading-step::before { content: '✓'; display: inline-grid; place-items: center; width: 17px; height: 17px; border: 1px solid rgba(0,207,232,0.3); border-radius: 50%; background: rgba(0,207,232,0.07); color: var(--ih-cyan); font-size: 10px; font-weight: 700; }
+@keyframes ih-step-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes ih-pulse { 0%, 100% { box-shadow: 0 0 0 rgba(0,207,232,0); } 50% { box-shadow: 0 0 20px rgba(0,207,232,0.26); } }
 
 .ih-report-shell { padding: 24px; margin-bottom: 10px; }
@@ -218,23 +234,23 @@ div[data-testid="stAlert"] { border-radius: 12px !important; border: 1px solid v
 .ih-reset-note { margin-top: 12px; color: var(--ih-muted); font-size: 12px; text-align: center; }
 
 @media (min-width: 768px) {
-    [data-testid="stBlockContainer"] { padding-top: 20px !important; }
-    .ih-nav { margin-bottom: 48px; }
-    .ih-hero { margin-bottom: 27px; }
+    [data-testid="stBlockContainer"] { padding-top: 0 !important; }
+    .ih-nav { margin-bottom: 24px; }
+    .ih-hero { margin-bottom: 22px; }
     .ih-report-shell, [data-testid="stVerticalBlockBorderWrapper"] { padding: 30px !important; }
 }
 @media (max-width: 520px) {
-    [data-testid="stBlockContainer"] { padding: 8px 16px 24px !important; }
-    .ih-nav { margin: 0 -16px 18px; padding: 10px 16px; }
+    [data-testid="stBlockContainer"] { padding: 0 16px 18px !important; }
+    .ih-nav { margin: 0 -16px 16px; padding: 9px 16px; }
     .ih-product-label { font-size: 9px; }
     .ih-hero h1 { font-size: 30px; }
     .ih-hero p { font-size: 13px; }
-    .ih-hero { margin-bottom: 17px; }
+    .ih-hero { margin-bottom: 16px; }
     .ih-badge { margin-bottom: 11px; }
     .ih-form-title { font-size: 16px; }
     div[data-testid="stTextArea"] textarea { min-height: 96px !important; height: 96px !important; padding: 14px !important; }
-    div.stButton { margin-top: 12px; }
-    div.stButton > button { min-height: 54px !important; }
+    div.stButton { margin-top: 14px; }
+    div.stButton > button { max-width: none !important; min-height: 60px !important; }
     .ih-report-shell, .ih-loading, [data-testid="stVerticalBlockBorderWrapper"] { border-radius: 16px; padding: 20px !important; }
 }
 </style>
@@ -278,8 +294,8 @@ if st.session_state.app_state == "idle":
         <div class="ih-form-title">What are you building?</div>
     </div>
     """, unsafe_allow_html=True)
-    user_idea = st.text_area("Concept Field", placeholder="Describe your startup concept here...", label_visibility="collapsed", height=104)
-    if st.button("Generate my playbook"):
+    user_idea = st.text_area("Concept Field", placeholder="Describe your startup concept here...", label_visibility="collapsed", height=110)
+    if st.button("🚀 Generate AI Playbook →"):
         if not user_idea.strip(): st.warning("Please type an idea first!")
         else:
             st.session_state.app_state = "generating"
@@ -291,9 +307,14 @@ if st.session_state.app_state == "generating":
     st.markdown("""
     <div class="ih-loading">
         <div class="ih-loading-icon">✦</div>
-        <h2>Analyzing your startup idea...</h2>
-        <p>Building a focused validation playbook for your next move.</p>
-        <div class="ih-loading-status">AI analysis in progress</div>
+        <h2>🧠 Analyzing your startup...</h2>
+        <p>Turning your idea into a clear path forward.</p>
+        <div class="ih-loading-steps">
+            <div class="ih-loading-step">Understanding your idea</div>
+            <div class="ih-loading-step">Identifying target users</div>
+            <div class="ih-loading-step">Evaluating the opportunity</div>
+            <div class="ih-loading-step">Building your execution roadmap</div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     try:
@@ -325,4 +346,3 @@ if st.session_state.app_state == "results":
         st.session_state.playbook_data = None
         st.rerun()
     st.markdown('<p class="ih-reset-note">Start a fresh analysis whenever your idea evolves.</p>', unsafe_allow_html=True)
-
