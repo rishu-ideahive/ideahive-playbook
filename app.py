@@ -334,6 +334,15 @@ def generate_content_with_retry(client, model, contents, on_retry=None):
                 ),
             )
         except Exception as error:
+            # TEMP DIAGNOSTIC LOGGING — remove once root cause is confirmed.
+            logger.error(
+                "TEMP DIAGNOSTIC | attempt=%s | exception_type=%s.%s | message=%s",
+                attempt,
+                type(error).__module__,
+                type(error).__name__,
+                str(error),
+                exc_info=True,
+            )
             if not _is_retryable_gemini_error(error):
                 logger.exception("Non-retryable Gemini request failure on attempt %s", attempt)
                 raise
