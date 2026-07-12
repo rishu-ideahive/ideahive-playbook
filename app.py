@@ -118,29 +118,35 @@ html, body, [data-testid="stAppViewContainer"] {
 .ih-form-title, .ih-result-title { margin: 4px 0 0; color: var(--ih-white); font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 700; }
 
 div[data-testid="stTextArea"] { margin-top: 0 !important; }
-div[data-testid="stTextArea"] textarea {
-    min-height: 132px !important;
-    padding: 16px !important;
+div[data-testid="stTextArea"] [data-baseweb="textarea"] {
     border: 1px solid var(--ih-border) !important;
     border-radius: 14px !important;
+    background: rgba(7, 7, 15, 0.92) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+div[data-testid="stTextArea"] textarea {
+    min-height: 104px !important;
+    height: 104px !important;
+    padding: 16px !important;
+    border: 0 !important;
     background: rgba(7, 7, 15, 0.92) !important;
     color: var(--ih-white) !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 15px !important;
     line-height: 1.55 !important;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025) !important;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 div[data-testid="stTextArea"] textarea::placeholder { color: #657088 !important; }
-div[data-testid="stTextArea"] textarea:focus {
+div[data-testid="stTextArea"] [data-baseweb="textarea"]:focus-within {
     border-color: var(--ih-cyan) !important;
     box-shadow: 0 0 0 3px rgba(0, 207, 232, 0.12), inset 0 1px 0 rgba(255,255,255,0.03) !important;
 }
 
-div.stButton { margin-top: 12px; }
+div.stButton { margin-top: 14px; }
 div.stButton > button {
     width: 100% !important;
-    min-height: 52px !important;
+    min-height: 56px !important;
+    padding: 0 24px !important;
     border: 0 !important;
     border-radius: 50px !important;
     background: linear-gradient(135deg, var(--ih-indigo), var(--ih-cyan), var(--ih-indigo)) !important;
@@ -149,7 +155,8 @@ div.stButton > button {
     font-family: 'Inter', sans-serif !important;
     font-size: 15px !important;
     font-weight: 700 !important;
-    box-shadow: 0 5px 24px rgba(108, 92, 231, 0.3) !important;
+    letter-spacing: 0.01em !important;
+    box-shadow: 0 7px 26px rgba(108, 92, 231, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease !important;
 }
 div.stButton > button:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0, 207, 232, 0.28) !important; filter: brightness(1.06); }
@@ -166,12 +173,14 @@ div.stButton > button:focus-visible { outline: 3px solid rgba(0, 207, 232, 0.35)
     background: rgba(19, 19, 31, 0.8);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 16px 42px rgba(0, 0, 0, 0.18);
 }
-.ih-loading { padding: 28px 24px; text-align: center; }
+.ih-loading { padding: 24px; text-align: center; }
 .ih-loading::before, .ih-report-shell::before { content: ''; position: absolute; width: 190px; height: 190px; border-radius: 50%; pointer-events: none; filter: blur(4px); }
 .ih-loading::before { top: -110px; right: -62px; background: radial-gradient(circle, rgba(0,207,232,0.2), transparent 68%); }
 .ih-loading-icon { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; margin-bottom: 11px; border: 1px solid rgba(0,207,232,0.3); border-radius: 14px; background: rgba(0,207,232,0.08); color: var(--ih-cyan); font-size: 19px; animation: ih-pulse 1.5s ease-in-out infinite; }
 .ih-loading h2 { margin: 0 0 5px; color: var(--ih-white); font-family: 'Syne', sans-serif; font-size: 19px; }
 .ih-loading p { margin: 0; color: var(--ih-muted); font-size: 13px; }
+.ih-loading-status { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; color: var(--ih-soft); font-size: 11px; font-weight: 600; }
+.ih-loading-status::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--ih-cyan); box-shadow: 0 0 8px var(--ih-cyan); }
 @keyframes ih-pulse { 0%, 100% { box-shadow: 0 0 0 rgba(0,207,232,0); } 50% { box-shadow: 0 0 20px rgba(0,207,232,0.26); } }
 
 .ih-report-shell { padding: 24px; margin-bottom: 10px; }
@@ -215,11 +224,17 @@ div[data-testid="stAlert"] { border-radius: 12px !important; border: 1px solid v
     .ih-report-shell, [data-testid="stVerticalBlockBorderWrapper"] { padding: 30px !important; }
 }
 @media (max-width: 520px) {
-    [data-testid="stBlockContainer"] { padding: 14px 16px 42px !important; }
-    .ih-nav { margin: 0 -16px 30px; padding: 11px 16px; }
+    [data-testid="stBlockContainer"] { padding: 8px 16px 24px !important; }
+    .ih-nav { margin: 0 -16px 18px; padding: 10px 16px; }
     .ih-product-label { font-size: 9px; }
     .ih-hero h1 { font-size: 30px; }
     .ih-hero p { font-size: 13px; }
+    .ih-hero { margin-bottom: 17px; }
+    .ih-badge { margin-bottom: 11px; }
+    .ih-form-title { font-size: 16px; }
+    div[data-testid="stTextArea"] textarea { min-height: 96px !important; height: 96px !important; padding: 14px !important; }
+    div.stButton { margin-top: 12px; }
+    div.stButton > button { min-height: 54px !important; }
     .ih-report-shell, .ih-loading, [data-testid="stVerticalBlockBorderWrapper"] { border-radius: 16px; padding: 20px !important; }
 }
 </style>
@@ -263,7 +278,7 @@ if st.session_state.app_state == "idle":
         <div class="ih-form-title">What are you building?</div>
     </div>
     """, unsafe_allow_html=True)
-    user_idea = st.text_area("Concept Field", placeholder="Describe your startup concept here...", label_visibility="collapsed", height=130)
+    user_idea = st.text_area("Concept Field", placeholder="Describe your startup concept here...", label_visibility="collapsed", height=104)
     if st.button("Generate my playbook"):
         if not user_idea.strip(): st.warning("Please type an idea first!")
         else:
@@ -278,6 +293,7 @@ if st.session_state.app_state == "generating":
         <div class="ih-loading-icon">✦</div>
         <h2>Analyzing your startup idea...</h2>
         <p>Building a focused validation playbook for your next move.</p>
+        <div class="ih-loading-status">AI analysis in progress</div>
     </div>
     """, unsafe_allow_html=True)
     try:
@@ -309,3 +325,4 @@ if st.session_state.app_state == "results":
         st.session_state.playbook_data = None
         st.rerun()
     st.markdown('<p class="ih-reset-note">Start a fresh analysis whenever your idea evolves.</p>', unsafe_allow_html=True)
+
