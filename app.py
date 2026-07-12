@@ -1,6 +1,10 @@
 import streamlit as st
 import os
+import logging
+import time
+import httpx
 from google import genai
+from google.genai import types
 
 
 # Page configuration
@@ -265,8 +269,117 @@ if not gemini_key:
 
 client = genai.Client(api_key=gemini_key)
 
+
+logger = logging.getLogger(__name__)
+RETRY_DELAYS_SECONDS = (2, 4, 8, 16)
+MAX_GEMINI_ATTEMPTS = 5
+MAX_RETRY_WINDOW_SECONDS = 60
+GEMINI_REQUEST_TIMEOUT_MS = 30_000  # per-attempt cap so a hung request can't block retries forever
+
+
+class GeminiRetryExhaustedError(Exception):
+    """Raised when a temporary Gemini outage outlasts the bounded retry plan."""
+
+
+def _is_retryable_gemini_error(error):
+    """Prefer structured Gemini/HTTP error data; use text only when none exists."""
+    # A request that hung and hit our own timeout is a temporary condition by
+    # definition, not a permanent one. httpx timeout exceptions don't always
+    # carry a usable message, so this is checked by type rather than text.
+    if isinstance(error, (httpx.TimeoutException, httpx.ConnectError)):
+        return True
+
+    structured_values = []
+
+    for source in (error, getattr(error, "response", None)):
+        if source is None:
+            continue
+        for attribute in ("status_code", "status", "code", "error_code"):
+            value = getattr(source, attribute, None)
+            if value is not None:
+                structured_values.append(value)
+
+    if structured_values:
+        for value in structured_values:
+            if isinstance(value, int) and not isinstance(value, bool) and value == 503:
+                return True
+            normalized_value = str(value).strip().upper()
+            if normalized_value in {"503", "UNAVAILABLE", "SERVICE_UNAVAILABLE"}:
+                return True
+        return False
+
+    fallback_message = str(error).lower()
+    temporary_markers = (
+        "503",
+        "service unavailable",
+        "model is overloaded",
+        "model is experiencing high demand",
+        "temporary unavailable",
+        "unavailable",
+    )
+    return any(marker in fallback_message for marker in temporary_markers)
+
+
+def generate_content_with_retry(client, model, contents, on_retry=None):
+    """Run the existing request with bounded backoff for temporary service failures only."""
+    started_at = time.monotonic()
+
+    for attempt in range(1, MAX_GEMINI_ATTEMPTS + 1):
+        try:
+            return client.models.generate_content(
+                model=model,
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    http_options=types.HttpOptions(timeout=GEMINI_REQUEST_TIMEOUT_MS)
+                ),
+            )
+        except Exception as error:
+            if not _is_retryable_gemini_error(error):
+                logger.exception("Non-retryable Gemini request failure on attempt %s", attempt)
+                raise
+
+            if attempt == MAX_GEMINI_ATTEMPTS:
+                logger.exception("Temporary Gemini failure on final attempt %s", attempt)
+                raise GeminiRetryExhaustedError() from error
+
+            retry_delay = RETRY_DELAYS_SECONDS[attempt - 1]
+            if time.monotonic() + retry_delay > started_at + MAX_RETRY_WINDOW_SECONDS:
+                logger.exception(
+                    "Gemini retry window expired after attempt %s; original error: %s",
+                    attempt,
+                    error,
+                )
+                raise GeminiRetryExhaustedError() from error
+
+            logger.warning(
+                "Temporary Gemini failure on attempt %s; retrying in %s seconds. Original error: %s",
+                attempt,
+                retry_delay,
+                error,
+            )
+            if on_retry:
+                on_retry(attempt)
+            time.sleep(retry_delay)
+
 if "app_state" not in st.session_state: st.session_state.app_state = "idle"
 if "playbook_data" not in st.session_state: st.session_state.playbook_data = None
+
+
+def render_loading_card(target, title, message):
+    """Render the existing branded loading treatment with user-friendly status copy."""
+    target.markdown(f"""
+    <div class="ih-loading">
+        <div class="ih-loading-icon">✦</div>
+        <h2>{title}</h2>
+        <p>{message}</p>
+        <div class="ih-loading-steps">
+            <div class="ih-loading-step">Understanding your idea</div>
+            <div class="ih-loading-step">Identifying target users</div>
+            <div class="ih-loading-step">Evaluating the opportunity</div>
+            <div class="ih-loading-step">Building your execution roadmap</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 
 # Product header and focused hero
@@ -304,22 +417,32 @@ if st.session_state.app_state == "idle":
     st.markdown('<p class="ih-form-note">Built for students, solo founders, and first-time entrepreneurs.</p>', unsafe_allow_html=True)
 
 if st.session_state.app_state == "generating":
-    st.markdown("""
-    <div class="ih-loading">
-        <div class="ih-loading-icon">✦</div>
-        <h2>🧠 Analyzing your startup...</h2>
-        <p>Turning your idea into a clear path forward.</p>
-        <div class="ih-loading-steps">
-            <div class="ih-loading-step">Understanding your idea</div>
-            <div class="ih-loading-step">Identifying target users</div>
-            <div class="ih-loading-step">Evaluating the opportunity</div>
-            <div class="ih-loading-step">Building your execution roadmap</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    loading_slot = st.empty()
+    render_loading_card(
+        loading_slot,
+        "🧠 Analyzing your startup...",
+        "Turning your idea into a clear path forward.",
+    )
+
+    def _update_loading_on_retry(attempt):
+        """Advance the existing loading card as retries happen, so the screen never looks frozen."""
+        next_attempt = attempt + 1
+        stage_copy = {
+            1: ("⚡ AI engine is busy...", "Retrying automatically..."),
+            2: ("🔄 Retrying automatically...", f"Attempt {next_attempt} of {MAX_GEMINI_ATTEMPTS}"),
+            3: ("🔄 Retrying automatically...", f"Attempt {next_attempt} of {MAX_GEMINI_ATTEMPTS}"),
+            4: ("✨ Almost there...", f"Attempt {next_attempt} of {MAX_GEMINI_ATTEMPTS}"),
+        }
+        title, message = stage_copy.get(
+            attempt, ("🔄 Retrying automatically...", f"Attempt {next_attempt} of {MAX_GEMINI_ATTEMPTS}")
+        )
+        render_loading_card(loading_slot, title, message)
+
     try:
-        response = client.models.generate_content(
+        response = generate_content_with_retry(
+            client=client,
             model="gemini-2.5-flash",
+            on_retry=_update_loading_on_retry,
             contents=f"""
 You are an experienced early-stage startup advisor. Produce a concise, rigorous, and actionable startup playbook for the idea below.
 
@@ -398,8 +521,22 @@ Before finalizing, check: would a founder actually use this report to build and 
         st.session_state.playbook_data = response.text
         st.session_state.app_state = "results"
         st.rerun()
+    except GeminiRetryExhaustedError:
+        loading_slot.empty()
+        st.error("""🚦
+
+IdeaHive AI is currently experiencing unusually high demand.
+
+We automatically tried several times but Google's AI service is temporarily unavailable.
+
+Please wait about one minute and try again.
+
+Thank you for your patience.""")
+        st.session_state.app_state = "idle"
     except Exception as e:
-        st.error(f"Engine connection anomaly: {str(e)}")
+        loading_slot.empty()
+        logger.exception("Gemini request stopped without retry: %s", e)
+        st.error("IdeaHive AI could not process this request right now. Please check your input and try again.")
         st.session_state.app_state = "idle"
 
 if st.session_state.app_state == "results":
