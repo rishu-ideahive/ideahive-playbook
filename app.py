@@ -462,77 +462,64 @@ if st.session_state.app_state == "generating":
             model="gemini-2.5-flash",
             on_retry=_update_loading_on_retry,
             contents=f"""
-You are an experienced early-stage startup advisor. Produce a concise, rigorous, and actionable startup playbook for the idea below.
+You are an experienced early-stage startup advisor...
 
-Startup idea: {st.session_state.current_idea}
+Startup idea:
+{st.session_state.current_idea}
 
-Write for a founder who must decide what to validate and build next. Use crisp, direct language similar to an excellent YC, Sequoia, or First Round partner memo. Do not use hype, filler, greetings, generic encouragement, or phrases such as "Great idea", "This is exciting", or "As an AI". Do not repeat the idea unnecessarily. Be realistic about uncertainty: distinguish assumptions from facts, avoid invented market figures, and state practical ways to validate uncertain claims.
+IMPORTANT:
 
-Return Markdown only. Use the following exact H1 headings, in this exact order. Do not omit a section. Use short paragraphs and focused bullets; use numbered steps where sequence matters. Do not use tables.
+Keep the entire report concise.
+
+Maximum length: approximately 600–800 words.
+
+Prioritize practical, actionable advice over long explanations.
+
+Use bullet points wherever possible.
+
+Avoid repeating information between sections.
+
+Keep each section short and focused.
+
+Think like a startup mentor giving a founder a clear execution brief, not writing a business textbook.
+
+Return Markdown only.
+
+Use the following exact H1 headings in this exact order.
 
 # Startup Snapshot
-Give a concise description of the business, the customer, and the core job-to-be-done.
+- 3 concise bullets
 
----
-
-# Problem
-Explain the real-world problem, who feels it, why current workarounds fail, and why it matters now.
-
----
-
-# Target Customer
-Cover the primary audience, secondary audience, and ideal early adopters. Make each segment specific enough to reach.
-
----
+# Problem & Target Customer
+- Explain the core problem
+- Identify the ideal early user
 
 # Value Proposition
-State the promised outcome, why users would choose it over alternatives, and the clearest differentiator.
-
----
-
-# Market Opportunity
-Assess relevant trends, likely demand signals, and realistic potential. Do not claim market size figures unless they are supplied; name the assumptions that need validation.
-
----
-
-# Competitor Landscape
-Identify likely categories of existing solutions, their strengths and weaknesses, and a defensible wedge for differentiation. Do not invent specific competitors unless they are widely obvious from the idea.
-
----
+- Why users will choose this solution
 
 # MVP Roadmap
-Provide Phase 1, Phase 2, and Phase 3. Clearly state what to build first, what to postpone, and the measurable outcome that unlocks the next phase.
-
----
+- Phase 1
+- Phase 2
 
 # Recommended Tech Stack
-Recommend Frontend, Backend, Database, AI, Hosting, Payments, and Analytics. For each, give one practical default choice and a brief reason. Mark components as optional where the MVP does not need them.
+- Frontend
+- Backend
+- Database
+- AI
+- Hosting
 
----
+# Go-To-Market
+- Practical plan for the first 100 users
 
-# Revenue Model
-Evaluate subscriptions, freemium, marketplace, commission, and licensing where relevant. Recommend the best fit, explain why, and name a simple initial pricing test.
-
----
-
-# Go-To-Market Plan
-Provide concrete plans for the first 100 users and first 1,000 users. Cover community, content, partnerships, Product Hunt only if relevant, and a specific social strategy. Prioritize channels where the target customer already gathers.
-
----
-
-# Risks
-List the largest execution, market, technical, and founder risks. For each risk, give an early warning signal and a mitigation or test.
-
----
-
-# 30-Day Action Plan
-Organize concrete, achievable tasks into Week 1, Week 2, Week 3, and Week 4. Focus on validation and shipping evidence, not abstract planning.
-
----
+# Top 3 Risks
+- Risk
+- Mitigation
 
 # Final Verdict
-Provide Overall potential, Difficulty, Time to MVP, Estimated validation speed, and Overall recommendation. Use calibrated language and a clear next decision.
-
+- Potential
+- Difficulty
+- Time to MVP
+- Recommended next step
 Before finalizing, check: would a founder actually use this report to build and validate a startup? If not, replace vague advice with specific next actions.
 """
         )
