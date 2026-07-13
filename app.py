@@ -438,7 +438,7 @@ if st.session_state.app_state == "generating":
     loading_slot = st.empty()
     render_loading_card(
         loading_slot,
-        "🧠 Analyzing your startup...",
+        "🧠 Analyzing your Idea...",
         "Turning your idea into a clear path forward.",
     )
 
